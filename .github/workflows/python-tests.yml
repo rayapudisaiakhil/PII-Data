@@ -1,19 +1,51 @@
+name: Python CI
+
+on:
+  push:
+    branches:
+      - main
+      - development
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-    - name: Add PII-Data to PYTHONPATH
-      run: echo "PYTHONPATH=${{ github.workspace }}/PII-Data" >> $GITHUB_ENV
-    - name: Run tests
-      run: python -m unittest discover -s dags/test -p '*_test.py'
+        pip install pytest-cov
+
+    - name: Run tests with coverage
+      run: pytest --cov=src --cov-report=xml
+      continue-on-error: false
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-results
+        path: coverage.xml
+
+    - name: Notify on success
+      if: success()
+      run: echo "All tests and coverage checks passed successfully!"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "One or more tests failed or coverage checks did not pass."
+
+
 
 
 
