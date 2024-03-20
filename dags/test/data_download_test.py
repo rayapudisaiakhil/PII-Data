@@ -5,7 +5,8 @@ from unittest.mock import patch
 from google.cloud import storage
 
 # Ensure the correct import path for the function you want to test
-from PII-Data.dags.src.data_download import load_data_from_gcp_and_save_as_json
+from ..src.data_download import load_data_from_gcp_and_save_as_json
+
 
 class TestDataDownload(unittest.TestCase):
     @patch('src.data_download.storage.Client')
