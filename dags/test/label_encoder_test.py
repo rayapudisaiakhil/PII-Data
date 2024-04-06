@@ -12,6 +12,9 @@ class TestTargetLabelEncoder(unittest.TestCase):
         # Mock the behavior of open to return a file handle with a valid JSON string
         mock_open().__enter__().read.return_value = '[{"labels": ["label1", "label2"]}]'
         
+        # Mock the behavior of json.load to return a list of dictionaries
+        mock_json.load.return_value = [{"labels": ["label1", "label2"]}]
+        
         # Call the function under test
         output_path = target_label_encoder(ti=mock_ti)
         
