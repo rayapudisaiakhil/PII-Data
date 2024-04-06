@@ -1,42 +1,32 @@
-# import os
-# import json
-# from unittest.mock import MagicMock, patch
+import unittest
+from unittest.mock import MagicMock, patch, mock_open
+from dags.src.resampling import resample_data
+import os
+class TestResampleData(unittest.TestCase):
+    @patch('dags.src.resampling.open')
+    @patch('dags.src.resampling.json')
+    @patch('dags.src.resampling.os.getcwd')
+    def test_resample_data_function_call(self, mock_getcwd, mock_json, mock_open):
+        # Mock input data
+        input_data = [{'text': 'sample text', 'labels': ['O', 'B-PERSON', 'O']}]
+        
+        # Mock os.getcwd to return a dummy project directory
+        mock_getcwd.return_value = '/dummy/project/dir'
+        
+        # Mock open method to return input data
+        mock_open().__enter__().read.return_value = input_data
+        
+        # Call the function under test
+        output_path = resample_data()
 
-# import sys
-# # Append the path of the 'dags' directory to sys.path
-# current_dir = os.path.dirname(__file__)
-# parent_dir = os.path.abspath(os.path.join(current_dir, '..', 'src'))
-# sys.path.insert(0, parent_dir)
+        # Assert that the function returns a non-empty output path
+        self.assertTrue(output_path)
 
-# from resampling import resample_data
+        # Assert that open method was called
+        mock_open.assert_called_once()
 
-# # Adjust paths according to your project structure
-# PROJECT_DIR = os.getcwd()
-# INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'dags', 'processed', 'duplicate_removal.pkl')
-# OUTPUT_JSON_PATH = os.path.join(PROJECT_DIR, 'dags', 'processed', 'resampled.json')
+        # Assert that json.dump was called with the correct data
+        mock_open().__enter__().write.assert_called_once_with(input_data)
 
-
-
-# def test_resample_data_input_output(mocker):
-#     """
-#     Test checks if the input is a .pkl file and the output is a .json file.
-#     """
-#     # Mock the ti object and its xcom_pull method
-#     mocked_ti = MagicMock()
-#     mocked_ti.xcom_pull.return_value = INPUT_PICKLE_PATH
-
-#     # Mock json.dump to avoid actual file writing
-#     mocker.patch('json.dump')
-    
-#     # Mock pandas.read_pickle instead of open, if that's what your function uses
-#     mocker.patch('pandas.read_pickle', return_value="Mocked DataFrame")
-
-#     # Execute the resample_data function
-#     result = resample_data(ti=mocked_ti)
-
-#     # Verify the output path
-#     assert result == OUTPUT_JSON_PATH, f"Expected {OUTPUT_JSON_PATH}, got {result}"
-
-#     # Verify json.dump was called, indicating writing to a JSON file
-#     assert json.dump.called, "json.dump was not called"
-
+if __name__ == '__main__':
+    unittest.main()
