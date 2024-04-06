@@ -9,9 +9,9 @@ import pandas as pd
 from dags.src.missing_values import naHandler
 
 class TestNaHandler(unittest.TestCase):
-    @patch('missing_value.os.getcwd')
-    @patch('missing_value.pd.DataFrame')
-    @patch('missing_value.pickle.dump')
+    @patch('dags.src.missing_values.os.getcwd')
+    @patch('dags.src.missing_values.pd.DataFrame')
+    @patch('dags.src.missing_values.pickle.dump')
     @patch('builtins.open', new_callable=mock_open)
     def test_naHandler(self, mock_open, mock_pickle_dump, mock_pd_DataFrame, mock_getcwd):
         # Mock the current working directory
@@ -40,9 +40,9 @@ class TestNaHandler(unittest.TestCase):
 
         self.assertEqual(output_path, os.path.join(os.path.dirname(__file__), 'missing_values.pkl'))
 
-    @patch('missing_value.os.getcwd')
-    @patch('missing_value.pd.DataFrame')
-    @patch('missing_value.pickle.dump')
+    @patch('missing_values.os.getcwd')
+    @patch('missing_values.pd.DataFrame')
+    @patch('missing_values.pickle.dump')
     @patch('builtins.open', new_callable=mock_open)
     def test_naHandler_with_missing_input(self, mock_open, mock_pickle_dump, mock_pd_DataFrame, mock_getcwd):
         # Mock the current working directory
