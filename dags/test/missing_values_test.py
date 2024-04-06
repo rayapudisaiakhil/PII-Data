@@ -1,61 +1,62 @@
-# import os
-# import pytest
-# import sys
+import unittest
+from unittest import mock
+from unittest.mock import MagicMock, patch
+import os
+import json
+import pandas as pd
 
-# from unittest.mock import MagicMock
+# Import the function to test
+from dags.src.missing_values import naHandler
 
-# # Append the path of the 'dags' directory to sys.path
-# current_dir = os.path.dirname(__file__)
-# parent_dir = os.path.abspath(os.path.join(current_dir, '..', 'src'))
-# sys.path.insert(0, parent_dir)
+class TestNaHandler(unittest.TestCase):
+    @patch('missing_value.os.getcwd')
+    @patch('missing_value.pd.DataFrame')
+    @patch('missing_value.pickle.dump')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_naHandler(self, mock_open, mock_pickle_dump, mock_pd_DataFrame, mock_getcwd):
+        # Mock the current working directory
+        mock_getcwd.return_value = os.path.dirname(os.path.abspath(__file__))
 
-# from missing_values import naHandler  # Adjust the import path as needed
+        # Define a mock input data
+        input_data = [{'full_text': 'text1'}, {'full_text': 'text2'}]
+        # Mock the content of the input JSON file
+        mock_open.return_value.__enter__.return_value.read.return_value = json.dumps(input_data)
 
-# PROJECT_DIR = os.getcwd()
-# INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'dags', 'processed', 'train.json')
-# OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'dags', 'processed', 'missing_values.pkl')
+        # Mock the DataFrame constructor
+        mock_df_instance = MagicMock(spec=pd.DataFrame)
+        mock_pd_DataFrame.return_value = mock_df_instance
 
-# # import os
-# # import pytest
-# # from unittest.mock import MagicMock
-# # from missing_values import naHandler
+        # Mock the XCom value from the previous task
+        mock_ti = MagicMock()
+        mock_ti.xcom_pull.return_value = os.path.join(os.path.dirname(__file__), 'input.json')
 
-# # # PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# # PROJECT_DIR = os.getcwd()
-# # INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'dags', 'processed', 'train_com.json')
-# # # OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR,  'processed', 'missing_values.pkl')
+        # Call the function under test
+        output_path = naHandler(ti=mock_ti)
 
-# # OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'dags', 'processed', 'missing_values.pkl')
+        # Assertions
+        mock_pd_DataFrame.assert_called_once_with(input_data)
+        mock_df_instance.dropna.assert_called_once_with(subset=['full_text'], inplace=True)
+        mock_pickle_dump.assert_called_once()
 
+        self.assertEqual(output_path, os.path.join(os.path.dirname(__file__), 'missing_values.pkl'))
 
-# def test_naHandler_success(mocker):
-#     """
-#     Test successful removal of rows with missing values and saving of the dataframe.
-#     """
-#     # Mock the ti object and its xcom_pull method
-#     mocked_ti = MagicMock()
-#     mocked_ti.xcom_pull.return_value = INPUT_PICKLE_PATH
+    @patch('missing_value.os.getcwd')
+    @patch('missing_value.pd.DataFrame')
+    @patch('missing_value.pickle.dump')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_naHandler_with_missing_input(self, mock_open, mock_pickle_dump, mock_pd_DataFrame, mock_getcwd):
+        # Mock the current working directory
+        mock_getcwd.return_value = os.path.dirname(os.path.abspath(__file__))
 
-#     # Use mocker to simulate passing the ti object
-#     result = naHandler(ti=mocked_ti)
-#     assert result == OUTPUT_PICKLE_PATH, f"Expected {OUTPUT_PICKLE_PATH}, but got {result}."
+        # Mock the XCom value from the previous task to return None
+        mock_ti = MagicMock()
+        mock_ti.xcom_pull.return_value = None
 
-# def test_naHandler_file_not_found(mocker):
-#     """
-#     Test that naHandler raises an error when the input pickle doesn't exist.
-#     """
-#     # Rename the input pickle temporarily to simulate its absence
-#     if os.path.exists(INPUT_PICKLE_PATH):
-#         os.rename(INPUT_PICKLE_PATH, INPUT_PICKLE_PATH + ".bak")
+        # Call the function under test and expect FileNotFoundError
+        with self.assertRaises(FileNotFoundError):
+            naHandler(ti=mock_ti)
 
-#     # Mock the ti object and its xcom_pull method
-#     mocked_ti = MagicMock()
-#     mocked_ti.xcom_pull.return_value = INPUT_PICKLE_PATH
+    # Add more test cases as needed...
 
-#     with pytest.raises(FileNotFoundError):
-#         naHandler(ti=mocked_ti)
-
-#     # Rename the input pickle back to its original name
-#     if os.path.exists(INPUT_PICKLE_PATH + ".bak"):
-#         os.rename(INPUT_PICKLE_PATH + ".bak", INPUT_PICKLE_PATH)
-
+if __name__ == '__main__':
+    unittest.main()
