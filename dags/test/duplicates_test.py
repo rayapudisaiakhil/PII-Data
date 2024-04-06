@@ -9,7 +9,7 @@ class TestDupeRemoval(unittest.TestCase):
     @patch('dags.src.duplicates.open')
     def test_dupeRemoval_function_call(self, mock_open, mock_pickle):
         # Call the function under test
-        dupeRemoval()
+        dupeRemoval(ti=None)
         
         # Assertions
         mock_open.assert_called_once()
