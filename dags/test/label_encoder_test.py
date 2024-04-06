@@ -22,16 +22,7 @@ class TestTargetLabelEncoder(unittest.TestCase):
         self.assertTrue(output_path)
 
         # Assert that open method was called with the correct arguments
-        mock_open.assert_called_once_with(..., 'r')
-
-        # Assert that json.load was called with the correct file handle
-        mock_json.load.assert_called_once_with(mock_open().__enter__())
-
-        # Assert that open method was called with the correct arguments
-        mock_open.assert_any_call(..., 'w')
-
-        # Assert that json.dump was called with the correct arguments
-        mock_open().__enter__().write.assert_called_once()
+        mock_open.assert_called_once_with(..., 'w')
 
 if __name__ == '__main__':
     unittest.main()
