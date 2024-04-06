@@ -4,12 +4,20 @@ import unittest
 from unittest.mock import MagicMock, patch, mock_open
 from dags.src.duplicates import dupeRemoval
 
+import unittest
+from unittest.mock import MagicMock, patch
+from dags.src.duplicates import dupeRemoval
+
 class TestDupeRemoval(unittest.TestCase):
     @patch('dags.src.duplicates.pickle')
     @patch('dags.src.duplicates.open')
     def test_dupeRemoval_function_call(self, mock_open, mock_pickle):
-        # Call the function under test
-        dupeRemoval(ti=None)
+        # Mock ti object with xcom_pull method
+        mock_ti = MagicMock()
+        mock_ti.xcom_pull.return_value = 'dags/'
+        
+        # Call the function under test with the mocked ti object
+        dupeRemoval(ti=mock_ti)
         
         # Assertions
         mock_open.assert_called_once()
