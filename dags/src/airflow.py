@@ -61,6 +61,7 @@ def task_failure_alert(context):
     Log URL: {context['task_instance'].log_url}<br>
     """
     send_email(to='gvk7663@gmail.com', subject=subject, html_content=html_content)
+    
 load_data_task = PythonOperator(
     task_id='load_data_from_gcp',
     python_callable=load_data_from_gcp_and_save_as_json,

@@ -13,9 +13,10 @@ def dupeRemoval(**kwargs):
     print("fetched project directory successfully",PROJECT_DIR)    
     ti = kwargs['ti']
     inputPath = ti.xcom_pull(task_ids='missing_values_removal')
+    # inputPath = os.path.join(PROJECT_DIR, "dags", "processed", "missing_values.pkl")
     print("fetched path from missing values task op",inputPath)
-    print("Loading data from:", inputPath)
     if os.path.exists(inputPath):
+        print("Loading data from:", inputPath)
         with open(inputPath, "rb") as file:
             df = pickle.load(file)
     else:
@@ -31,4 +32,6 @@ def dupeRemoval(**kwargs):
     print(f'Data pickled after dupeRemoval at {outputPath}')
 
     return outputPath
+# dupeRemoval()
+
         
