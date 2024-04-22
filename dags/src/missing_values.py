@@ -46,5 +46,3 @@ def naHandler(**kwargs):
     print(f'Data pickled after naHandling at {outputPath}')
 
     return outputPath
-
-naHandler()

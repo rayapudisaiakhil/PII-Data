@@ -7,7 +7,7 @@ from google.cloud import storage
 def load_data_from_gcp_and_save_as_json(**kwargs):
     try:
         PROJECT_DIR = os.getcwd()
-            print("fetched project directory successfully",PROJECT_DIR)          
+        print("fetched project directory successfully",PROJECT_DIR)          
         data_dir=kwargs['data_dir']
         num_data_points=kwargs['num_data_points']
         bucket_name=kwargs['bucket_name']

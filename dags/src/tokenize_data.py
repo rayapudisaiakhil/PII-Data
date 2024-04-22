@@ -165,6 +165,7 @@ def tokenize_data(**kwargs):
         for t, l, ws in zip(
             example["tokens"], example["labels"], example["trailing_whitespace"]
         ):
+            # print("entered for loop")
             text.append(t)
             labels.extend([l] * len(t))
 
@@ -195,12 +196,14 @@ def tokenize_data(**kwargs):
         length = len(tokenized.input_ids)
 
         return {**tokenized, "labels": token_labels, "length": length}
-    
+    print("starting tokenize ds_mapped")
     ds_mapped = ds.map(tokenize_train, fn_kwargs={"tokenizer": tokenizer, "label2id": label2id, "max_length": TRAINING_MAX_LENGTH}, num_proc=3)
     output_ds_json_path = os.path.join(PROJECT_DIR, 'dags', 'processed', 'ds_data.json')  # Specify your output path for the training dataset
-    
+    print("starting to jsonify dsmap")
     ds_mapped.to_json(output_ds_json_path)
+    print("finishenify")
     ds_mapped.save_to_disk(os.path.join(PROJECT_DIR, 'dags', 'processed', 'ds_data'))
+    print("saved to disk")
 
     train_mapped = train_dataset.map(tokenize_train, fn_kwargs={"tokenizer": tokenizer, "label2id": label2id, "max_length": TRAINING_MAX_LENGTH}, num_proc=3)
     test_mapped = test_dataset.map(tokenize_train, fn_kwargs={"tokenizer": tokenizer, "label2id": label2id, "max_length": TRAINING_MAX_LENGTH}, num_proc=3)
@@ -214,8 +217,8 @@ def tokenize_data(**kwargs):
     test_mapped.save_to_disk(os.path.join(PROJECT_DIR, 'dags', 'processed', 'test_data'))
     
 
-    
-    return ds_mapped,train_mapped,test_mapped
+    return output_ds_json_path,output_train_json_path,output_test_json_path
+    # return ds_mapped,train_mapped,test_mapped
     
     
 # tokenize_data()

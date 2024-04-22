@@ -1,4 +1,4 @@
 /logs
 key.json
 training.log
-/output
+output/deberta_model

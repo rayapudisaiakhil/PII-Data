@@ -74,7 +74,7 @@ def preprocess_text(text):
     
     return text
 
-def serve(**kwargs):
+def serve_model(**kwargs):
     ti= kwargs['ti']
     _,_,_,_,model_path = ti.xcom_pull(task_ids='inference')  
 
