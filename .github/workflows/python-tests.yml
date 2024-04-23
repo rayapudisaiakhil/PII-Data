@@ -5,9 +5,11 @@ on:
     branches:
       - main
       - development
+      - Lahari_test_update
   pull_request:
     branches:
       - main
+      - Lahari_test_update
 
 jobs:
   test:
