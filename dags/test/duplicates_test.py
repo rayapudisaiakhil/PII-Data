@@ -1,9 +1,10 @@
-import os
 import unittest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest import mock
+from unittest import TestCase 
+from unittest.mock import MagicMock, patch, mock_open
+import os
+import json
 import pandas as pd
-import pickle
-
 # Import the function to test
 from dags.src.duplicates import dupeRemoval
 
