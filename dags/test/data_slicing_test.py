@@ -7,8 +7,8 @@ from google.cloud import storage
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataDownload(unittest.TestCase):
-    @patch('dags.src.data_download.storage.Client')
-    @patch('dags.src.data_download.storage.Blob')
+    @patch('dags.src.data_slicing.storage.Client')
+    @patch('dags.src.data_slicing.storage.Blob')
     def test_load_data_from_gcp_and_save_as_json(self, mock_blob_class, mock_client):
         # Mock the storage client and bucket
         mock_bucket = mock.MagicMock()
