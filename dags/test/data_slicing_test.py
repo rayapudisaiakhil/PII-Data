@@ -2,7 +2,7 @@ import os
 import unittest
 import json
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from google.cloud import storage
 
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
@@ -10,13 +10,13 @@ from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 class TestDataDownload(unittest.TestCase):
     @patch('dags.src.data_slicing.storage.Client')
     @patch('dags.src.data_slicing.storage.Blob')
-    @patch('builtins.open', new_callable=mock.mock_open, read_data='{"data": "value"}')
+    @patch('builtins.open', mock.mock_open(read_data='0'))  # Adjusted to return a string that represents an integer
     @patch('json.load', return_value={"data": "value"})
     @patch('json.dump')
     def test_load_data_from_gcp_and_save_as_json(self, mock_json_dump, mock_json_load, mock_open, mock_blob_class, mock_client):
         # Mock the storage client and bucket
-        mock_bucket = mock.MagicMock()
-        mock_blob_instance = mock.MagicMock()  # This represents an instance of Blob
+        mock_bucket = MagicMock()
+        mock_blob_instance = MagicMock()  # This represents an instance of Blob
 
         # Set up the mock client to return the mock bucket
         mock_client.return_value.get_bucket.return_value = mock_bucket
@@ -30,8 +30,8 @@ class TestDataDownload(unittest.TestCase):
         mock_bucket_name = 'your-bucket-name'
         mock_key_path = '/path/to/key.json'
 
-        # Mock the os.path.exists to always return True for the existence checks
-        with mock.patch('os.path.exists', return_value=True):
+        # Mock the os.path.exists to simulate different file existence states
+        with mock.patch('os.path.exists', side_effect=lambda path: path.endswith('json') or path.endswith('txt')):
             # Mock the os.makedirs to do nothing
             with mock.patch('os.makedirs') as mock_makedirs:
                 # Perform the test
