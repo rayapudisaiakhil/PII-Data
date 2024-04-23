@@ -1,45 +1,54 @@
 import unittest
 from unittest.mock import patch, MagicMock
+from google.cloud import storage
 
+# Assuming your function is located in a file called `data_slicing.py` under a module named `dags.src`
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataDownload(unittest.TestCase):
-    @patch('dags.src.data_slicing.storage.Client')
+    @patch('dags.src.data_slicing.json.dump')
+    @patch('dags.src.data_slicing.json.load', return_value={"data": "value"})
+    @patch('builtins.open', new_callable=unittest.mock.mock_open, read_data='0')
     @patch('dags.src.data_slicing.storage.Blob')
-    @patch('builtins.open', new_callable=unittest.mock.mock_open)
-    @patch('json.load', return_value={"data": "dummy data"})
-    @patch('json.dump')
-    @patch('os.path.exists', return_value=True)
-    @patch('os.makedirs')
-    def test_load_data_from_gcp_and_save_as_json(self, mock_makedirs, mock_exists, mock_json_dump, mock_json_load, mock_open, mock_blob_class, mock_client):
-        # Prepare the mock client and blob
+    @patch('dags.src.data_slicing.storage.Client')
+    def test_load_data_from_gcp_and_save_as_json(self, mock_client, mock_blob_class, mock_open, mock_json_load, mock_json_dump):
+        # Mock the storage client and blob
         mock_bucket = MagicMock()
         mock_blob_instance = MagicMock()
+
+        # Setup the mock client to return the mock bucket
         mock_client.return_value.get_bucket.return_value = mock_bucket
+
+        # Set the mock Blob class to return the mock_blob_instance when instantiated
         mock_blob_class.return_value = mock_blob_instance
 
-        # Test inputs
-        test_data_dir = '/fake/dir'
-        test_num_data_points = 10
-        test_bucket_name = 'fake-bucket'
-        test_key_path = '/fake/key.json'
+        # Prepare the mock input parameters
+        mock_data_dir = '/path/to/data'
+        mock_num_data_points = 10
+        mock_bucket_name = 'your-bucket-name'
+        mock_key_path = '/path/to/key.json'
 
-        # Perform the test
-        result = load_data_from_gcp_and_save_as_json(
-            data_dir=test_data_dir,
-            num_data_points=test_num_data_points,
-            bucket_name=test_bucket_name,
-            KEY_PATH=test_key_path
-        )
+        # Mock path.exists to simulate different file existence states
+        with patch('os.path.exists', side_effect=lambda path: path.endswith('.json') or path.endswith('.txt')):
+            with patch('os.makedirs') as mock_makedirs:
+                # Perform the test
+                local_sliced_path, local_cumulative_path, end_index = load_data_from_gcp_and_save_as_json(
+                    data_dir=mock_data_dir,
+                    num_data_points=mock_num_data_points,
+                    bucket_name=mock_bucket_name,
+                    KEY_PATH=mock_key_path
+                )
 
-        # Check the result type
-        self.assertIsInstance(result, tuple, "Function should return a tuple.")
-        # Assuming the function returns paths, check they are strings or None
-        self.assertTrue(all(isinstance(x, (str, type(None))) for x in result), "Each item in the tuple should be a string or None.")
+                # Assertions to check behaviors
+                mock_makedirs.assert_not_called()
+                mock_blob_instance.download_to_filename.assert_called_once()
 
-        # Assert interactions
-        mock_blob_instance.download_to_filename.assert_called_once()  # Ensuring file was attempted to be downloaded
-        mock_json_dump.assert_called()  # Ensure data was attempted to be saved
+                # Ensure the function returns a tuple
+                self.assertIsInstance((local_sliced_path, local_cumulative_path, end_index), tuple)
+
+                # Check if the function returned the expected paths
+                self.assertIn("dags/processed/Fetched/sliced_train_", local_sliced_path)
+                self.assertIn("dags/processed/Fetched/cumulative_train_", local_cumulative_path)
 
 if __name__ == '__main__':
     unittest.main()
