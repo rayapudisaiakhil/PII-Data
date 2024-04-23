@@ -4,7 +4,7 @@ from unittest import mock
 from unittest.mock import patch
 from google.cloud import storage
 
-from dags.src.data_download import load_data_from_gcp_and_save_as_json
+from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataDownload(unittest.TestCase):
     @patch('dags.src.data_download.storage.Client')
