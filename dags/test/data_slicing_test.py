@@ -1,5 +1,6 @@
 import os
 import unittest
+import json
 from unittest import mock
 from unittest.mock import patch
 from google.cloud import storage
@@ -9,7 +10,10 @@ from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 class TestDataDownload(unittest.TestCase):
     @patch('dags.src.data_slicing.storage.Client')
     @patch('dags.src.data_slicing.storage.Blob')
-    def test_load_data_from_gcp_and_save_as_json(self, mock_blob_class, mock_client):
+    @patch('builtins.open', new_callable=mock.mock_open, read_data='{"data": "value"}')
+    @patch('json.load', return_value={"data": "value"})
+    @patch('json.dump')
+    def test_load_data_from_gcp_and_save_as_json(self, mock_json_dump, mock_json_load, mock_open, mock_blob_class, mock_client):
         # Mock the storage client and bucket
         mock_bucket = mock.MagicMock()
         mock_blob_instance = mock.MagicMock()  # This represents an instance of Blob
@@ -37,10 +41,10 @@ class TestDataDownload(unittest.TestCase):
                     bucket_name=mock_bucket_name,
                     KEY_PATH=mock_key_path
                 )
-                
+
                 # Verify os.makedirs was not called since the directory exists
                 mock_makedirs.assert_not_called()
-                
+
                 # Verify the blob download was called on the mock_blob_instance
                 mock_blob_instance.download_to_filename.assert_called_once()
 
