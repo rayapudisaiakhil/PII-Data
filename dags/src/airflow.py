@@ -30,7 +30,7 @@ import json
 import os
 
 send_alert_to='gvk7663@gmail.com'
-data_dir = r'C:\Users\siddh\OneDrive - Northeastern University\Desktop\NEU Essentials\03 Spring 24\00 IE7374 ML Ops\MLFlow\pii-new\PII-Data'
+data_dir =os.getcwd()
 # os.path.join(PROJECT_DIR, "dags", "processed") #sere to save the batched data
 num_data_points = 10 #number of data points to fetch
 # cumulative = True #make this true if new batc has to be retrained with old data
