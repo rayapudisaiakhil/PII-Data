@@ -30,7 +30,12 @@ class TestNaHandler(TestCase):
         self.assertTrue(mock_pd_DataFrame.called)
         self.assertTrue(mock_pickle_dump.called)
         self.assertTrue(output_path.endswith('missing_values.pkl'))
+<<<<<<< HEAD
 
 if __name__ == '__main__':
     unittest.main()
+=======
+>>>>>>> 002939b78a68491b2f6aafe71b0752c0f5222272
 
+if __name__ == '__main__':
+    unittest.main()

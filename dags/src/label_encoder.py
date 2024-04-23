@@ -22,6 +22,7 @@ def target_label_encoder(**kwargs):
     print("fetched project directory successfully",PROJECT_DIR)    
     ti = kwargs['ti']
     inputPath = ti.xcom_pull(task_ids='resample_data')
+    # inputPath = os.path.join(PROJECT_DIR, 'dags', 'processed', 'resampled.json')
     print("fetched path from resample_data task",inputPath)
     
     # Check if the input file exists
@@ -46,7 +47,8 @@ def target_label_encoder(**kwargs):
     # Data to be saved
     label_encoder_data = {
         "label2id": label2id,
-        "id2label": id2label
+        "id2label": id2label,
+        "all_labels":all_labels
     }
     outputPath = os.path.join(PROJECT_DIR, "dags", "processed", "label_encoder_data.json")
     
@@ -60,4 +62,4 @@ def target_label_encoder(**kwargs):
     return outputPath
 
 
-
+# target_label_encoder()
