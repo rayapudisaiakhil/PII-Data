@@ -1,11 +1,11 @@
 import unittest
 import json
 from unittest.mock import MagicMock, patch
-from data_slicing import load_data_from_gcp_and_save_as_json
+from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataSlicing(unittest.TestCase):
-    @patch('data_slicing.os')
-    @patch('data_slicing.storage')
+    @patch('dags.src.data_slicing.os')
+    @patch('dags.src.data_slicing.storage')
     def test_load_data_from_gcp_and_save_as_json(self, mock_storage, mock_os):
         # Mocking kwargs
         kwargs = {
