@@ -20,20 +20,21 @@ class TestDataDownload(unittest.TestCase):
         # Set the mock Blob class to return the mock_blob_instance when instantiated
         mock_blob_class.return_value = mock_blob_instance
 
-        # Mock the os.path.exists to return True for train.json
+        # Mock the os.path.exists to always return True
         with mock.patch('os.path.exists', return_value=True):
-            with mock.patch('os.makedirs'):
+            # Mock the os.makedirs to do nothing
+            with mock.patch('os.makedirs') as mock_makedirs:
                 # Perform the test
-                kwargs = {
-                    'data_dir': 'dags/processed',
-                    'num_data_points': 10,
-                    'bucket_name': 'pii_train_data',
-                    'KEY_PATH': 'config/key.json'
-                }
-                load_data_from_gcp_and_save_as_json(**kwargs)
-
+                local_file_path = load_data_from_gcp_and_save_as_json()
+                
+                # Verify os.makedirs was not called since the directory exists
+                mock_makedirs.assert_not_called()
+                
                 # Verify the blob download was called on the mock_blob_instance
                 mock_blob_instance.download_to_filename.assert_called_once()
+
+                # Check if the function returned the expected path
+                self.assertIn("dags/processed/train.json", local_file_path)
 
 if __name__ == '__main__':
     unittest.main()
