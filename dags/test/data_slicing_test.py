@@ -1,36 +1,50 @@
+import os
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest import mock
+from unittest.mock import patch
+from google.cloud import storage
+
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
-class TestDataSlicing(unittest.TestCase):
+class TestDataDownload(unittest.TestCase):
     @patch('dags.src.data_slicing.storage.Client')
     @patch('dags.src.data_slicing.storage.Blob')
-    @patch('dags.src.data_slicing.os.makedirs')  # Add makedirs mock
-    @patch('dags.src.data_slicing.os.path.exists', return_value=False)
-    def test_load_data_from_gcp_and_save_as_json(self, mock_exists, mock_makedirs, mock_blob_class, mock_client):
+    def test_load_data_from_gcp_and_save_as_json(self, mock_blob_class, mock_client):
         # Mock the storage client and bucket
-        mock_bucket = mock_client.return_value.get_bucket.return_value
-        mock_blob_instance = mock_blob_class.return_value
-        mock_blob_instance.download_to_filename.return_value = None
+        mock_bucket = mock.MagicMock()
+        mock_blob_instance = mock.MagicMock()  # This represents an instance of Blob
 
-        # Perform the test
-        sliced_file, cumulative_file, end_index = load_data_from_gcp_and_save_as_json(
-            data_dir='/mocked/data/dir',
-            num_data_points=10,
-            bucket_name='mock-bucket',
-            KEY_PATH='/mocked/key/path'
-        )
+        # Set up the mock client to return the mock bucket
+        mock_client.return_value.get_bucket.return_value = mock_bucket
 
-        # Verify that makedirs is called
-        mock_makedirs.assert_called_once()
+        # Set the mock Blob class to return the mock_blob_instance when instantiated
+        mock_blob_class.return_value = mock_blob_instance
 
-        # Verify that download_to_filename is called
-        mock_blob_instance.download_to_filename.assert_called_once()
+        # Mock the os.path.exists to return True for train.json and False for other files
+        mock_exists_paths = {
+            os.path.join('dags', 'processed', 'Fetched', 'train.json'): True,
+            os.path.join('dags', 'processed', 'Fetched', 'end_index.txt'): False,
+            os.path.join('dags', 'processed', 'Fetched', 'sliced_train_0_10.json'): False,
+            os.path.join('dags', 'processed', 'Fetched', 'cumulative_train_0_10.json'): False,
+        }
+        with mock.patch('os.path.exists', side_effect=lambda path: mock_exists_paths.get(path, False)):
+            with mock.patch('os.makedirs'):
+                # Perform the test
+                kwargs = {
+                    'data_dir': 'dags/processed',
+                    'num_data_points': 10,
+                    'bucket_name': 'pii_train_data',
+                    'KEY_PATH': 'config/key.json'
+                }
+                sliced_path, cumulative_path, end_index = load_data_from_gcp_and_save_as_json(**kwargs)
 
-        # Verify the function returned the expected values
-        self.assertIsNotNone(sliced_file)
-        self.assertIsNotNone(cumulative_file)
-        self.assertIsNotNone(end_index)
+                # Verify the blob download was called on the mock_blob_instance
+                mock_blob_instance.download_to_filename.assert_called_once()
+
+                # Check if the function returned the expected paths
+                self.assertEqual(sliced_path, os.path.join('dags', 'processed', 'Fetched', 'sliced_train_0_10.json'))
+                self.assertEqual(cumulative_path, os.path.join('dags', 'processed', 'Fetched', 'cumulative_train_0_10.json'))
+                self.assertEqual(end_index, 10)
 
 if __name__ == '__main__':
     unittest.main()
