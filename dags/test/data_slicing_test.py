@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataSlicing(unittest.TestCase):
-    @patch('dags.src.data_slicing.os')
+    @patch('dags.src.data_slicing.os.path.join')
     @patch('dags.src.data_slicing.storage')
-    def test_load_data_from_gcp_and_save_as_json(self, mock_storage, mock_os):
+    def test_load_data_from_gcp_and_save_as_json(self, mock_storage, mock_os_join):
         # Mocking kwargs
         kwargs = {
             'data_dir': 'test_data',
@@ -15,11 +15,8 @@ class TestDataSlicing(unittest.TestCase):
             'KEY_PATH': 'test_key.json'
         }
         
-        # Mocking os.getcwd()
-        mock_os.getcwd.return_value = '/test/project'
-        
-        # Mocking os.path.exists() to return False for destination_dir
-        mock_os.path.exists.return_value = False
+        # Mocking os.path.join() to return explicit paths
+        mock_os_join.side_effect = lambda *args: '/test/project/dags/processed/Fetched/' + args[-1]
         
         # Mocking storage.Client() and its methods
         mock_bucket = MagicMock()
