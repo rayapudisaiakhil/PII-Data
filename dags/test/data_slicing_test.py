@@ -5,13 +5,14 @@ from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestLoadDataFromGCPAndSaveAsJSON(unittest.TestCase):
     @patch('dags.src.data_slicing.os.makedirs')
-    @patch('dags.src.data_slicing.os.path.exists', return_value=False)
+    @patch('dags.src.data_slicing.os.path.exists', return_value=True)
     @patch('dags.src.data_slicing.storage.Client')
     @patch('dags.src.data_slicing.storage.Blob')
-    @patch('dags.src.data_slicing.json.load', side_effect=[[]])
+    @patch('dags.src.data_slicing.json.load')
     def test_load_data_from_gcp_and_save_as_json(self, mock_json_load, mock_blob, mock_client, mock_path_exists, mock_makedirs):
         mock_client_instance = mock_client.return_value
         mock_blob_instance = mock_blob.return_value
+        mock_json_load.return_value = []  # Return an empty list for json.load
 
         kwargs = {
             'data_dir': None,
@@ -20,7 +21,6 @@ class TestLoadDataFromGCPAndSaveAsJSON(unittest.TestCase):
             'KEY_PATH': 'test_key.json'
         }
 
-        # Call the function under test
         load_data_from_gcp_and_save_as_json(**kwargs)
 
         mock_client.assert_called_once_with()
