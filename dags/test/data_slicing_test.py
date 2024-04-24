@@ -1,20 +1,8 @@
-import os
 import unittest
-import tempfile
-import shutil
 from unittest.mock import patch, MagicMock
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestLoadDataFromGCPAndSaveAsJSON(unittest.TestCase):
-    def setUp(self):
-        self.test_dir = tempfile.mkdtemp()
-        self.mock_bucket_name = "mock-bucket-name"
-        self.mock_key_path = "/path/to/mock/key"
-        self.mock_num_data_points = 10
-
-    def tearDown(self):
-        shutil.rmtree(self.test_dir)
-
     @patch('dags.src.data_slicing.os.environ.get', return_value="/mock/key/path")
     @patch('dags.src.data_slicing.os.makedirs')
     @patch('dags.src.data_slicing.os.path.exists', return_value=False)
@@ -26,20 +14,20 @@ class TestLoadDataFromGCPAndSaveAsJSON(unittest.TestCase):
 
         kwargs = {
             'data_dir': None,
-            'num_data_points': self.mock_num_data_points,
-            'bucket_name': self.mock_bucket_name,
-            'KEY_PATH': self.mock_key_path
+            'num_data_points': 10,
+            'bucket_name': 'test_bucket',
+            'KEY_PATH': 'test_key.json'
         }
 
         load_data_from_gcp_and_save_as_json(**kwargs)
 
         mock_client.assert_called_once_with()
-        mock_client_instance.get_bucket.assert_called_once_with(self.mock_bucket_name)
+        mock_client_instance.get_bucket.assert_called_once_with('test_bucket')
         mock_blob.assert_called_once_with("Data/train.json", mock_client_instance.get_bucket.return_value)
         mock_blob_instance.download_to_filename.assert_called_once()
         mock_makedirs.assert_called_once()
         mock_path_exists.assert_called()
-        mock_environ_get.assert_called_once_with('GOOGLE_APPLICATION_CREDENTIALS', self.mock_key_path)
+        mock_environ_get.assert_called_once_with('GOOGLE_APPLICATION_CREDENTIALS', 'test_key.json')
 
 if __name__ == '__main__':
     unittest.main()
