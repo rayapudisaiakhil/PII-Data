@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import patch, MagicMock
 from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
@@ -19,6 +20,7 @@ class TestLoadDataFromGCPAndSaveAsJSON(unittest.TestCase):
             'KEY_PATH': 'test_key.json'
         }
 
+        # Call the function under test
         load_data_from_gcp_and_save_as_json(**kwargs)
 
         mock_client.assert_called_once_with()
@@ -28,8 +30,13 @@ class TestLoadDataFromGCPAndSaveAsJSON(unittest.TestCase):
         mock_makedirs.assert_called_once()
         mock_path_exists.assert_called()
 
+        # Get the expected file path from the function
+        project_dir = os.getcwd()
+        destination_dir = os.path.join(project_dir, "dags", "processed", "Fetched")
+        expected_file_path = os.path.join(destination_dir, "train.json")
+
         # Ensure that json.load is called with the correct filename
-        mock_json_load.assert_called_once_with('/home/runner/work/PII-Data/PII-Data/dags/processed/Fetched/train.json')
+        mock_json_load.assert_called_once_with(expected_file_path)
 
 if __name__ == '__main__':
     unittest.main()
