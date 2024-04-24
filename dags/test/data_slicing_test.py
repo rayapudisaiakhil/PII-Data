@@ -1,10 +1,10 @@
 import unittest
 import os
 from unittest.mock import patch
-from data_slicing import load_data_from_gcp_and_save_as_json
+from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataSlicing(unittest.TestCase):
-    @patch('data_slicing.storage')
+    @patch('dags.src.data_slicing.storage')
     def test_load_data_from_gcp_and_save_as_json(self, mock_storage):
         # Mocking storage.Client() and storage.Blob() behavior
         mock_client = mock_storage.Client.return_value
