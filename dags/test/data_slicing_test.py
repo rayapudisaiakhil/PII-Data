@@ -1,11 +1,11 @@
 import unittest
 import json
 from unittest.mock import MagicMock, patch
-from dags.src.data_slicing import load_data_from_gcp_and_save_as_json
+from data_slicing import load_data_from_gcp_and_save_as_json
 
 class TestDataSlicing(unittest.TestCase):
-    @patch('dags.src.data_slicing.os')
-    @patch('dags.src.data_slicing.storage')
+    @patch('data_slicing.os')
+    @patch('data_slicing.storage')
     def test_load_data_from_gcp_and_save_as_json(self, mock_storage, mock_os):
         # Mocking kwargs
         kwargs = {
@@ -21,10 +21,10 @@ class TestDataSlicing(unittest.TestCase):
         # Mocking os.path.exists() to return False for destination_dir
         mock_os.path.exists.return_value = False
         
-        # Mocking storage.Blob().download_to_filename()
+        # Mocking storage.Client() and its methods
+        mock_bucket = MagicMock()
         mock_blob = MagicMock()
         mock_blob.download_to_filename.return_value = None
-        mock_bucket = MagicMock()
         mock_bucket.get_blob.return_value = mock_blob
         mock_client = MagicMock()
         mock_client.get_bucket.return_value = mock_bucket
