@@ -149,6 +149,7 @@ marshmallow-oneofschema==3.1.1
 marshmallow-sqlalchemy==0.26.1
 mdit-py-plugins==0.4.0
 mdurl==0.1.2
+mlflow
 mock==5.1.0
 more-itertools==10.2.0
 multidict==6.0.5
