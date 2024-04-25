@@ -232,6 +232,7 @@ tokenizers==0.15.2
 tomli==2.0.1
 tqdm==4.66.2
 transformers==4.38.2
+torch
 typing_extensions==4.10.0
 tzdata==2024.1
 uc-micro-py==1.0.3
